@@ -1,11 +1,29 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, Platform, StatusBar } from 'react-native';
 
 export default class App extends React.Component {
   render() {
     return (
       <View style={styles.container}>
-        <Text>Open up App.js to start working on your app!</Text>
+        {/* 結果を表示するView */}
+        <View style={styles.result}>
+        <View style={styles.resultLine}></View>
+        <View style={styles.resultLine}></View>
+        <View style={styles.resultLine}></View>
+        </View>
+        {/* ボタンを配置するView */}
+        <View style={styles.buttons}>
+          <View style={styles.buttonsLine}></View>
+          <View style={styles.buttonsLine}></View>
+          <View style={styles.buttonsLine}></View>
+          <View style={styles.lastButtonLinesContainer}>
+            <View style={styles.twoButtonsLines}>
+              <View style={styles.buttonsLine}></View>
+              <View style={styles.buttonsLine}></View>
+            </View>
+            <View style={styles.enterButtonContainer}></View>
+          </View>
+        </View>
       </View>
     );
   }
@@ -13,9 +31,45 @@ export default class App extends React.Component {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+   flex: 1,
+   backgroundColor: '#fff',
+   alignItems: 'center',
+   justifyContent: 'center',
+  },
+// 結果を表示する領域と、1つずつの行のスタイル
+  results: {
+   flex: 3,
+   backgroundColor: '#fff',
+  },
+  resultLine: {
+   flex: 1,
+   borderBottomWidth: 1,
+   justifyContent: 'center',
+   alignItems: 'flex-end',
+  },
+// ボタンを表示する領域と、ボタンの行のスタイル
+　buttons: {
+   flex: 5,
+  },
+  buttonsLine: {
+   flex: 1,
+   flexDirection: 'row',
+   justifyContent: 'space-between',
+   backgroundColor: '#fff',
+   alignItems: 'center',
+   borderWidth: 1,
+  },
+//  最後の2行は組み方が違うので違うスタイルを設定する
+  lastButtonLinesContainer: {
+   flex: 2,
+   flexDirection: 'row',
+  },
+  twoButtonsLines: {
+   flex: 3,
+  },
+  enterButtonContainer: {
+   flex: 1,
+   alignItems: 'center',
+   borderWidth: 1,
   },
 });
