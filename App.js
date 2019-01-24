@@ -1,12 +1,14 @@
 import React from 'react';
 import { StyleSheet, Text, View, Platform, StatusBar } from 'react-native';
 
+const STATUSBAR_HEIGHT = Platform.OS == 'ios' ? 20 : StatusBar.currentHeight;
+
 export default class App extends React.Component {
   render() {
     return (
       <View style={styles.container}>
         {/* 結果を表示するView */}
-        <View style={styles.result}>
+        <View style={styles.results}>
         <View style={styles.resultLine}></View>
         <View style={styles.resultLine}></View>
         <View style={styles.resultLine}></View>
@@ -33,8 +35,7 @@ const styles = StyleSheet.create({
   container: {
    flex: 1,
    backgroundColor: '#fff',
-   alignItems: 'center',
-   justifyContent: 'center',
+   paddingTop: STATUSBAR_HEIGHT,
   },
 // 結果を表示する領域と、1つずつの行のスタイル
   results: {
