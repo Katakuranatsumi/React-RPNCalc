@@ -15,28 +15,210 @@ const CalcButton = (props) => {
   )
 }
 
+// ボタンのFragmentを返すFunctional Component
+const CalcButtons = (props) => {
+  return (
+  <React.Fragment>
+   { props.buttons.map(button => {
+     return (
+      <CalcButton 
+         key={button.label}
+         flex={button.flex}
+         label={button.label}
+         btnEvent={button.btnEvent}
+      />
+     )
+   })}
+  </React.Fragment>
+  )
+}
+
 export default class App extends React.Component {
+// ボタンの定義
+buttons = [
+ [
+  {
+   label: 'AC',
+   flex: 2,
+   btnEvent: () => {this.acButton()},
+  },
+  {
+   label: 'c',
+   btnEvent: () => {this.cButton()},
+  },
+  {
+   label: '+',
+   btnEvent: () => {this.calcButton('+')},
+  }
+ ],
+ [
+  {
+    label: '7',
+    btnEvent: () => {this.valueButton('7')},
+  },
+  {
+    label: '8',
+    btnEvent: () => {this.valueButton('8')},
+  },
+  {
+    label: '9',
+    btnEvent: () => {this.valueButton('9')},
+  },
+  {
+    label: '-',
+    btnEvent: () => {this.calcButton('-')},
+  }
+ ],
+ [
+  {
+   label: '4',
+   btnEvent: () => {this.valueButton('4')},
+  },
+  {
+   label: '5',
+   btnEvent: () => {this.valueButton('5')},
+  },
+  {
+   label: '6',
+   btnEvent: () => {this.valueButton('6')},
+  },
+  {
+   label: '*',
+   btnEvent: () => {this.calcButton('*')},
+  }
+ ],
+ [
+  {
+   label: '1',
+   btnEvent: () => {this.valueButton('1')},
+  },
+  {
+   label: '2',
+   btnEvent: () => {this.valueButton('2')},
+  },
+  {
+   label: '3',
+   btnEvent: () => {this.valueButton('3')},
+  },
+ ],
+ [
+  {
+   label: '0',
+   btnEvent: () => {this.valueButton('0')},
+  },
+  {
+   label: '.',
+   btnEvent: () => {this.valueButton('.')},
+  },
+  {
+   label: '/',
+   btnEvent: () => {this.valueButton('/')},
+  },
+ ],
+ [
+  {
+    label: 'Enter',
+    btnEvent: () => {this.enterButton()},
+  },
+ ]
+]
+
+constructor(props) {
+  super(props)
+  this.state = {
+    results: [],
+    current: "0",
+    dotInputed: false,
+    afterValueButton: false,
+  }
+}
 
 // ボタンの役割ごとに関数を作成
-
 valueButton = (value) => {
-
+  let currentString = this.state.current
+  const dotInputed = this.state.dotInputed
+  let newDotInputed = dotInputed
+  if (value == ".") {
+    // .は2回入力されたら無視する
+    if(!dotInputed){
+      currentString = currentString + value
+      newDotInputed = true
+    }
+  } else if (currentString == "0") {
+    currentString = value
+  } else {
+    currentString = currentString + value
+  }
+  this.setState({current: currentString, dotInputed: newDotInputed, afterValueButton: true})
 }
 
 enterButton = () => {
-
+  let newValue = NaN
+  if (this.state.dotInputed) {
+    newValue = parseFloat(this.state.current)
+  } else {
+    newValue = parseInt(this.state.current)
+  }
+// parseに失敗したらスタックに積まない
+  if (isNaN(newValue)) {
+    return
+  }
+// スタックに新しい値を積む
+  let results = this.state.results
+  results.push(newValue)
+  this.setState({current: "0", dotInputed: false, results: results, afterValueButton: false})
 }
 
 calcButton = (value) => {
-
-}
+// スタックが2つ以上ない場合は計算しない
+  if (this.state.results.length < 2) {
+    return
+  }
+// 数値を入力中は受け付けない(スタックにあるものだけを処理する)
+  if (this.state.afterValueButton == true) {
+    return
+  }
+  let newResults = this.state.results
+  const target2 = newResults.pop()
+  const target1 = newResults.pop()
+  newValue = null
+// スタックから取得したものを計算する
+  switch (value) {
+     case '+':
+        newValue = target1 + target2
+        break
+     case '-':
+        newValue = target1 - target2
+        break
+     case '*':
+        newValue = target1 * target2
+        break
+     case '/':
+        newValue = target1 / target2
+        // 12:0で割った時に何もしないよう有限性をチェック
+        if (!isFinite(newValue)) {
+          newValue = null
+        }
+        break
+      default:
+        break
+      }
+      if (newValue == null) {
+        return
+      }
+      // 計算結果をスタックに積む
+      newResults.push(newValue)
+      this.setState({current: "0", dotInputed: false, results: newResults, afterValueButton: false})
+  }
 
 acButton = () => {
-
+  // ACボタンはスタックを含めて初期化する
+  this.setState({current: "0", dotInputed: false, results: [], afterValueButton: false})
 }
 
 cButton = () => {
-
+ // Cボタンはスタック以外を初期化する
+ this.setState({current: "0", dotInputed: false, afterValueButton: false}) 
 }
 
   render() {
@@ -45,25 +227,39 @@ cButton = () => {
         {/* 結果を表示するView */}
         <View style={styles.results}>
         <View style={styles.resultLine}></View>
-        <View style={styles.resultLine}></View>
-        <View style={styles.resultLine}></View>
+        <View style={styles.resultLine}>
+        {/* デバッグ表示: currentの値を表示 */}
+         <Text>{this.state.current}</Text>
+        </View>
+        <View style={styles.resultLine}>
+        {/* デバッグ表示： スタックの中身を表示 */}
+         <Text>{this.state.results.join('')}</Text>
+        </View>
         </View>
         {/* ボタンを配置するView */}
         <View style={styles.buttons}>
           <View style={styles.buttonsLine}>
           {/* ボタンを配置 */}
-          <CalcButton flex={2} label={'AC'} btnEvent={() => this.acButton()}/>
-          <CalcButton label={'c'} btnEvent={() => this.cButton()}/>
-          <CalcButton label={'+'} btnEvent={() => this.calcButton('+')} />
+          <CalcButtons buttons={this.buttons[0]} />
           </View>
-          <View style={styles.buttonsLine}></View>
-          <View style={styles.buttonsLine}></View>
+          <View style={styles.buttonsLine}>
+          <CalcButtons buttons={this.buttons[1]} />
+          </View>
+          <View style={styles.buttonsLine}>
+          <CalcButtons buttons={this.buttons[2]} />
+          </View>
           <View style={styles.lastButtonLinesContainer}>
             <View style={styles.twoButtonsLines}>
-              <View style={styles.buttonsLine}></View>
-              <View style={styles.buttonsLine}></View>
+              <View style={styles.buttonsLine}>
+              <CalcButtons buttons={this.buttons[3]} />
+              </View>
+              <View style={styles.buttonsLine}>
+              <CalcButtons buttons={this.buttons[4]} />
+              </View>
             </View>
-            <View style={styles.enterButtonContainer}></View>
+            <View style={styles.enterButtonContainer}>
+            <CalcButtons buttons={this.buttons[5]} />
+            </View>
           </View>
         </View>
       </View>
