@@ -221,19 +221,35 @@ cButton = () => {
  this.setState({current: "0", dotInputed: false, afterValueButton: false}) 
 }
 
+showValue = (index) => {
+  // 文字が入力中だった場合に表示対象を1つずらす
+  if (this.state.afterValueButton || this.state.results.length == 0) {
+    index = index - 1
+  }
+  // indexが-1になったら入力中なので currentを表示する
+  if (index == 1) {
+    return this.state.current
+  }
+  // スタックで表示できるものを優先して表示する
+  if (this.state.results.length > index) {
+    return this.state.results[this.state.results.length - 1 - index]
+  }
+  return ""
+}
+
   render() {
     return (
       <View style={styles.container}>
         {/* 結果を表示するView */}
         <View style={styles.results}>
-        <View style={styles.resultLine}></View>
         <View style={styles.resultLine}>
-        {/* デバッグ表示: currentの値を表示 */}
-         <Text>{this.state.current}</Text>
+         <Text>{this.showValue(2)}</Text>
         </View>
         <View style={styles.resultLine}>
-        {/* デバッグ表示： スタックの中身を表示 */}
-         <Text>{this.state.results.join('')}</Text>
+         <Text>{this.showValue(1)}</Text>
+        </View>
+        <View style={styles.resultLine}>
+         <Text>{this.showValue(0)}</Text>
         </View>
         </View>
         {/* ボタンを配置するView */}
@@ -283,6 +299,7 @@ const styles = StyleSheet.create({
    borderBottomWidth: 1,
    justifyContent: 'center',
    alignItems: 'flex-end',
+   paddingRight: 20,
   },
 // ボタンを表示する領域と、ボタンの行のスタイル
 　buttons: {
@@ -320,5 +337,12 @@ const styles = StyleSheet.create({
   },
   calcButtonText: {
     fontSize: 20,
+  },
+  resultLine: {
+    flex: 1,
+    borderBottomWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'flex-end',
+    paddingRight: 20,
   },
 });
