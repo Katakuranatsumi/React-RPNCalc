@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, Platform, StatusBar, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, Platform, StatusBar, TouchableOpacity, Dimensions } from 'react-native';
 
 const STATUSBAR_HEIGHT = Platform.OS == 'ios' ? 20 : StatusBar.currentHeight;
 
@@ -125,12 +125,39 @@ buttons = [
 
 constructor(props) {
   super(props)
+  // 初期初動時の縦の大きさと横の大きさを取得
+  const {height, width} = Dimensions.get('window')
   this.state = {
     results: [],
     current: "0",
     dotInputed: false,
     afterValueButton: false,
+    orientation: this.getOrientation(height, width),
   }
+}
+
+// 画面の向きを取得する関数
+getOrientation = (height, width) => {
+  if (height > width) {
+    return 'portrait'
+  }
+    return 'landscape'
+}
+
+// 画面の大きさが変わった時のイベント処理
+changeOrientation = ({window}) => {
+  const orientation = this.getOrientation(window.height, window.width)
+  this.setState({orientation: orientation})
+}
+
+componentDidMount() {
+  // 画面の変更された時に発生するイベントを登録
+  Dimensions.addEventListener('change', this.changeOrientation)
+}
+
+componentWillMount() {
+  // 画面の変更された時に発生するイベントを解除
+  Dimensions.removeEventListener('change', this.changeOrientation)
 }
 
 // ボタンの役割ごとに関数を作成
@@ -238,19 +265,25 @@ showValue = (index) => {
 }
 
   render() {
+    // 横向きと縦向きでflexの値を変更
+    let resultFlex = 3
+    if (this.state.orientation == 'landscape') {
+       resultFlex = 1
+    }
     return (
       <View style={styles.container}>
         {/* 結果を表示するView */}
-        <View style={styles.results}>
-        <View style={styles.resultLine}>
-         <Text>{this.showValue(2)}</Text>
-        </View>
-        <View style={styles.resultLine}>
-         <Text>{this.showValue(1)}</Text>
-        </View>
-        <View style={styles.resultLine}>
-         <Text>{this.showValue(0)}</Text>
-        </View>
+        {/* ↓flexの値をmergeする */}
+        <View style={[styles.results, {flex: resultFlex}]}>
+        {/* resultLineを動的に生成 */}
+         { [...Array(resultFlex).keys()].reverse().map(index => {
+          return (
+            <View style={styles.resultLine} key={"result_" + index}>
+              <Text>{this.showValue(index)}</Text>
+            </View>
+          )
+         }
+         )}
         </View>
         {/* ボタンを配置するView */}
         <View style={styles.buttons}>
